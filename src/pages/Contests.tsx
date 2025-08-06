@@ -2,48 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Users, Trophy, Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-// Mock contest data
-const mockContests = [
-  {
-    id: '1',
-    title: 'Weekly Contest 375',
-    description: 'Solve algorithmic problems in a timed environment',
-    start_time: '2024-01-20T09:00:00Z',
-    end_time: '2024-01-20T10:30:00Z',
-    duration: 90,
-    participants: 15420,
-    status: 'Running' as const,
-    is_rated: true,
-    prize_pool: '$500',
-    problems: ['1', '2', '3', '4'],
-  },
-  {
-    id: '2',
-    title: 'Biweekly Contest 120',
-    description: 'Challenge yourself with harder problems',
-    start_time: '2024-01-25T14:30:00Z',
-    end_time: '2024-01-25T17:00:00Z',
-    duration: 150,
-    participants: 0,
-    status: 'Upcoming' as const,
-    is_rated: true,
-    prize_pool: '$1000',
-    problems: ['5', '6', '7', '8'],
-  },
-  {
-    id: '3',
-    title: 'Weekly Contest 374',
-    description: 'Past contest with great problems',
-    start_time: '2024-01-13T09:00:00Z',
-    end_time: '2024-01-13T10:30:00Z',
-    duration: 90,
-    participants: 18750,
-    status: 'Ended' as const,
-    is_rated: true,
-    problems: ['9', '10', '11', '12'],
-  },
-];
+import { contestsData } from '../data/contests';
 
 const statusColors = {
   Running: 'bg-success-100 text-success-700 dark:bg-success-900 dark:text-success-300',
@@ -152,7 +111,7 @@ export const Contests: React.FC = () => {
 
       {/* Contests List */}
       <div className="space-y-6">
-        {mockContests.map((contest, index) => {
+        {contestsData.slice(0, 6).map((contest, index) => {
           const StatusIcon = statusIcons[contest.status];
           
           return (

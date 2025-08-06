@@ -43,7 +43,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const handleLanguageChange = (newLanguage: ProgrammingLanguage) => {
     setSelectedLanguage(newLanguage);
-    // You could add language-specific templates here
+    // Notify parent component about language change
+    // This will be handled by the parent component
   };
 
   return (

@@ -4,87 +4,30 @@ import { motion } from 'framer-motion';
 import { ThumbsUp, ThumbsDown, Star, BookOpen, MessageSquare, Play } from 'lucide-react';
 import { CodeEditor } from '../components/CodeEditor/CodeEditor';
 import { ProgrammingLanguage } from '../types';
-
-// Mock problem data
-const mockProblem = {
-  id: '1',
-  title: 'Two Sum',
-  difficulty: 'Easy' as const,
-  description: `Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
-
-You may assume that each input would have exactly one solution, and you may not use the same element twice.
-
-You can return the answer in any order.`,
-  examples: [
-    {
-      input: 'nums = [2,7,11,15], target = 9',
-      output: '[0,1]',
-      explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].',
-    },
-    {
-      input: 'nums = [3,2,4], target = 6',
-      output: '[1,2]',
-      explanation: 'Because nums[1] + nums[2] == 6, we return [1, 2].',
-    },
-    {
-      input: 'nums = [3,3], target = 6',
-      output: '[0,1]',
-      explanation: 'Because nums[0] + nums[1] == 6, we return [0, 1].',
-    },
-  ],
-  constraints: `• 2 <= nums.length <= 10^4
-• -10^9 <= nums[i] <= 10^9
-• -10^9 <= target <= 10^9
-• Only one valid answer exists.`,
-  hints: [
-    'A really brute force way would be to search for all possible pairs of numbers but that would be too slow. Again, it\'s best to try out brute force solutions for just for completeness. It is from these brute force solutions that you can come up with optimizations.',
-    'So, if we fix one of the numbers, say x, we have to scan the entire array to find the next number y which is value - x where value is the input parameter. Can we change our array somehow so that this search becomes faster?',
-    'The second train of thought is, without changing the array, can we use additional space somehow? Like maybe a hash map to speed up the search?',
-  ],
-  tags: ['Array', 'Hash Table'],
-  companies: ['Google', 'Amazon', 'Microsoft'],
-  likes: 25000,
-  dislikes: 850,
-  acceptance_rate: 49.1,
-};
-
-const defaultCode = {
-  python: `def twoSum(nums, target):
-    """
-    :type nums: List[int]
-    :type target: int
-    :rtype: List[int]
-    """
-    # Your code here
-    pass`,
-  javascript: `/**
- * @param {number[]} nums
- * @param {number} target
- * @return {number[]}
- */
-var twoSum = function(nums, target) {
-    // Your code here
-};`,
-  java: `class Solution {
-    public int[] twoSum(int[] nums, int target) {
-        // Your code here
-        return new int[]{};
-    }
-}`,
-};
+import { getProblemBySlug } from '../data/problems';
 
 export const ProblemDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [activeTab, setActiveTab] = useState<'description' | 'editorial' | 'solutions' | 'discuss'>('description');
   const [language, setLanguage] = useState<ProgrammingLanguage>('python');
-  const [code, setCode] = useState(defaultCode.python);
+  const [code, setCode] = useState('');
   const [testResults, setTestResults] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const problem = getProblemBySlug(slug || '');
+
+  React.useEffect(() => {
+    if (problem && problem.template) {
+      setCode(problem.template[language] || '');
+    }
+  }, [problem, language]);
+
   const handleLanguageChange = (newLanguage: ProgrammingLanguage) => {
     setLanguage(newLanguage);
-    setCode(defaultCode[newLanguage as keyof typeof defaultCode] || '');
+    if (problem && problem.template) {
+      setCode(problem.template[newLanguage] || '');
+    }
   };
 
   const handleRun = async () => {
@@ -109,7 +52,9 @@ export const ProblemDetail: React.FC = () => {
   };
 
   const handleReset = () => {
-    setCode(defaultCode[language as keyof typeof defaultCode] || '');
+    if (problem && problem.template) {
+      setCode(problem.template[language] || '');
+    }
     setTestResults([]);
   };
 
@@ -119,6 +64,21 @@ export const ProblemDetail: React.FC = () => {
     { id: 'solutions', label: 'Solutions', icon: Play },
     { id: 'discuss', label: 'Discuss', icon: MessageSquare },
   ];
+
+  if (!problem) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Problem Not Found
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            The problem you're looking for doesn't exist.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
@@ -158,16 +118,16 @@ export const ProblemDetail: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {mockProblem.title}
+                    {problem.title}
                   </h1>
                   <div className="flex items-center space-x-4">
                     <button className="flex items-center space-x-1 text-gray-500 hover:text-success-500 transition-colors">
                       <ThumbsUp className="h-4 w-4" />
-                      <span>{mockProblem.likes.toLocaleString()}</span>
+                      <span>{problem.likes?.toLocaleString() || 'N/A'}</span>
                     </button>
                     <button className="flex items-center space-x-1 text-gray-500 hover:text-error-500 transition-colors">
                       <ThumbsDown className="h-4 w-4" />
-                      <span>{mockProblem.dislikes.toLocaleString()}</span>
+                      <span>{problem.dislikes?.toLocaleString() || 'N/A'}</span>
                     </button>
                   </div>
                 </div>
@@ -177,16 +137,16 @@ export const ProblemDetail: React.FC = () => {
                     Easy: 'bg-success-100 text-success-700 dark:bg-success-900 dark:text-success-300',
                     Medium: 'bg-warning-100 text-warning-700 dark:bg-warning-900 dark:text-warning-300',
                     Hard: 'bg-error-100 text-error-700 dark:bg-error-900 dark:text-error-300',
-                  }[mockProblem.difficulty]}`}>
-                    {mockProblem.difficulty}
+                  }[problem.difficulty]}`}>
+                    {problem.difficulty}
                   </span>
                   <span className="text-gray-500 dark:text-gray-400">
-                    Acceptance: {mockProblem.acceptance_rate}%
+                    Acceptance: {problem.acceptance_rate?.toFixed(1) || 'N/A'}%
                   </span>
                 </div>
 
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {mockProblem.tags.map(tag => (
+                  {problem.tags.map(tag => (
                     <span
                       key={tag}
                       className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs"
@@ -200,7 +160,7 @@ export const ProblemDetail: React.FC = () => {
               {/* Problem Description */}
               <div className="prose dark:prose-invert max-w-none">
                 <div className="whitespace-pre-line text-gray-700 dark:text-gray-300">
-                  {mockProblem.description}
+                  {problem.description}
                 </div>
               </div>
 
@@ -210,7 +170,7 @@ export const ProblemDetail: React.FC = () => {
                   Examples
                 </h3>
                 <div className="space-y-4">
-                  {mockProblem.examples.map((example, index) => (
+                  {problem.examples.map((example, index) => (
                     <div
                       key={index}
                       className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700"
@@ -249,7 +209,7 @@ export const ProblemDetail: React.FC = () => {
                 </h3>
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                   <pre className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line font-mono">
-                    {mockProblem.constraints}
+                    {problem.constraints}
                   </pre>
                 </div>
               </div>
@@ -260,7 +220,7 @@ export const ProblemDetail: React.FC = () => {
                   Hints
                 </h3>
                 <div className="space-y-3">
-                  {mockProblem.hints.map((hint, index) => (
+                  {problem.hints.map((hint, index) => (
                     <details key={index} className="group">
                       <summary className="cursor-pointer text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium">
                         Hint {index + 1}

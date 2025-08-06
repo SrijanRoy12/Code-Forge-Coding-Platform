@@ -1,77 +1,16 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Plus, ThumbsUp, MessageSquare, Clock, Pin, Filter } from 'lucide-react';
+import { discussionsData, getAllDiscussionTags } from '../data/discussions';
 
-// Mock discussion data
-const mockDiscussions = [
-  {
-    id: '1',
-    title: 'Two Sum - Multiple approaches and optimization techniques',
-    content: 'I wanted to share different ways to solve the Two Sum problem and discuss their time complexities...',
-    user: {
-      username: 'algo_master',
-      avatar_url: null,
-    },
-    problem_title: 'Two Sum',
-    tags: ['Hash Table', 'Array', 'Optimization'],
-    upvotes: 156,
-    replies_count: 23,
-    is_pinned: true,
-    created_at: '2024-01-15T10:30:00Z',
-  },
-  {
-    id: '2',
-    title: 'Best practices for competitive programming in Python',
-    content: 'After participating in many contests, here are some Python-specific tips that helped me...',
-    user: {
-      username: 'python_guru',
-      avatar_url: null,
-    },
-    tags: ['Python', 'Tips', 'Competitive Programming'],
-    upvotes: 89,
-    replies_count: 15,
-    is_pinned: false,
-    created_at: '2024-01-14T16:45:00Z',
-  },
-  {
-    id: '3',
-    title: 'Weekly Contest 374 - Problem 3 discussion',
-    content: 'Did anyone else struggle with the third problem? I got TLE on large inputs...',
-    user: {
-      username: 'contest_lover',
-      avatar_url: null,
-    },
-    contest_title: 'Weekly Contest 374',
-    tags: ['Contest', 'Time Limit Exceeded'],
-    upvotes: 42,
-    replies_count: 8,
-    is_pinned: false,
-    created_at: '2024-01-13T11:20:00Z',
-  },
-  {
-    id: '4',
-    title: 'Dynamic Programming patterns and when to use them',
-    content: 'A comprehensive guide to recognizing DP problems and choosing the right approach...',
-    user: {
-      username: 'dp_expert',
-      avatar_url: null,
-    },
-    tags: ['Dynamic Programming', 'Patterns', 'Guide'],
-    upvotes: 234,
-    replies_count: 45,
-    is_pinned: false,
-    created_at: '2024-01-12T09:15:00Z',
-  },
-];
-
-const allTags = Array.from(new Set(mockDiscussions.flatMap(d => d.tags)));
+const allTags = getAllDiscussionTags();
 
 export const Discuss: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'recent' | 'popular' | 'replies'>('recent');
 
-  const filteredDiscussions = mockDiscussions.filter(discussion => {
+  const filteredDiscussions = discussionsData.filter(discussion => {
     const matchesSearch = discussion.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          discussion.content.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => discussion.tags.includes(tag));

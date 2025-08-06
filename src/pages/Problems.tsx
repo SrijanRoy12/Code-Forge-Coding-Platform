@@ -2,62 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Filter, CheckCircle, Circle, Star, Users, Clock } from 'lucide-react';
+import { problemsData, getAllTags, getAllCompanies } from '../data/problems';
 
-// Mock data - replace with actual API calls
-const mockProblems = [
-  {
-    id: '1',
-    title: 'Two Sum',
-    slug: 'two-sum',
-    difficulty: 'Easy' as const,
-    tags: ['Array', 'Hash Table'],
-    companies: ['Google', 'Amazon', 'Microsoft'],
-    acceptance_rate: 49.1,
-    total_submissions: 8500000,
-    likes: 25000,
-    is_premium: false,
-    status: 'solved' as const,
-  },
-  {
-    id: '2',
-    title: 'Add Two Numbers',
-    slug: 'add-two-numbers',
-    difficulty: 'Medium' as const,
-    tags: ['Linked List', 'Math', 'Recursion'],
-    companies: ['Facebook', 'Apple'],
-    acceptance_rate: 35.8,
-    total_submissions: 3200000,
-    likes: 18000,
-    is_premium: false,
-    status: 'attempted' as const,
-  },
-  {
-    id: '3',
-    title: 'Longest Substring Without Repeating Characters',
-    slug: 'longest-substring-without-repeating-characters',
-    difficulty: 'Medium' as const,
-    tags: ['Hash Table', 'String', 'Sliding Window'],
-    companies: ['Adobe', 'Bloomberg'],
-    acceptance_rate: 33.0,
-    total_submissions: 4100000,
-    likes: 22000,
-    is_premium: false,
-    status: null,
-  },
-  {
-    id: '4',
-    title: 'Median of Two Sorted Arrays',
-    slug: 'median-of-two-sorted-arrays',
-    difficulty: 'Hard' as const,
-    tags: ['Array', 'Binary Search', 'Divide and Conquer'],
-    companies: ['Google', 'Microsoft'],
-    acceptance_rate: 34.5,
-    total_submissions: 1800000,
-    likes: 15000,
-    is_premium: true,
-    status: null,
-  },
-];
+// Mock status for demonstration
+const getRandomStatus = () => {
+  const statuses = ['solved', 'attempted', null];
+  return statuses[Math.floor(Math.random() * statuses.length)] as 'solved' | 'attempted' | null;
+};
 
 const difficultyColors = {
   Easy: 'text-success-600 dark:text-success-400',
@@ -75,9 +26,9 @@ export const Problems: React.FC = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const allTags = Array.from(new Set(mockProblems.flatMap(p => p.tags)));
+  const allTags = getAllTags();
 
-  const filteredProblems = mockProblems.filter(problem => {
+  const filteredProblems = problemsData.filter(problem => {
     const matchesSearch = problem.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDifficulty = !selectedDifficulty || problem.difficulty === selectedDifficulty;
     const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => problem.tags.includes(tag));
@@ -196,7 +147,8 @@ export const Problems: React.FC = () => {
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredProblems.map((problem, index) => {
-                const StatusIcon = problem.status ? statusIcons[problem.status] : null;
+                const status = getRandomStatus();
+                const StatusIcon = status ? statusIcons[status] : null;
                 
                 return (
                   <motion.tr
@@ -210,7 +162,7 @@ export const Problems: React.FC = () => {
                       {StatusIcon && (
                         <StatusIcon 
                           className={`h-5 w-5 ${
-                            problem.status === 'solved' 
+                            status === 'solved' 
                               ? 'text-success-500' 
                               : 'text-warning-500'
                           }`} 
@@ -231,10 +183,10 @@ export const Problems: React.FC = () => {
                       </div>
                       <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
                         <Users className="h-3 w-3 mr-1" />
-                        {problem.total_submissions.toLocaleString()}
+                        {problem.total_submissions?.toLocaleString() || 'N/A'}
                         <span className="mx-2">•</span>
                         <span className="text-success-500">
-                          {problem.likes.toLocaleString()} likes
+                          {problem.likes?.toLocaleString() || 'N/A'} likes
                         </span>
                       </div>
                     </td>
@@ -244,7 +196,7 @@ export const Problems: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {problem.acceptance_rate}%
+                      {problem.acceptance_rate?.toFixed(1) || 'N/A'}%
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
